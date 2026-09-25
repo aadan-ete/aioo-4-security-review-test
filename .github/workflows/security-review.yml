@@ -1,0 +1,30 @@
+# Test copy of the AIOO-4 pilot workflow.
+# Identical to ete-sync's .github/workflows/security-review.yml except the
+# branch filter targets `main` instead of `develop`/`master`.
+name: Security Review
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  security-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+
+      - uses: anthropics/claude-code-security-review@main
+        with:
+          comment-pr: true
+          upload-results: false
+          claude-model: claude-sonnet-5
+          claude-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
